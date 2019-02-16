@@ -1,5 +1,6 @@
 use std::ops::Add;
 use std::ops::Mul;
+use std::fmt;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct Vector3 {
@@ -30,9 +31,39 @@ impl Vector3 {
         }
     }
 
-    // Test for overflow?
     pub fn dot(&self, other: &Vector3) -> f32 {
         self.x() * other.x() + self.y() * other.y() + self.z() * other.z()
+    }
+
+    pub fn length(&self) -> f32 {
+        f32::sqrt(self.x * self.x  + self.y * self.y + self.z * self.z)
+    }
+
+    pub fn make_unit_vector(&mut self) {
+        let len = self.length();
+        if len > 0.0 {
+            self.x /= len;
+            self.y /= len;
+            self.z /= len;
+        }
+    }
+
+    pub fn get_unit_vector(&self) -> Vector3 {
+        let len = self.length();
+        if len > 0.0 {
+            Vector3 {
+                x: self.x / len,
+                y: self.y / len,
+                z: self.z / len,
+            }
+        }
+        else {
+            Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            }
+        }
     }
 }
 
@@ -71,6 +102,12 @@ impl Mul<Vector3> for f32 {
            z: self * v.z(),
        }
    }
+}
+
+impl fmt::Display for Vector3 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} {} {}", self.x, self.y, self.z)
+    }
 }
 
 // Could add tests for overflows
