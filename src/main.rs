@@ -1,3 +1,9 @@
+mod vec3;
+mod ray;
+mod hitable;
+mod material;
+use crate::vec3::Vector3;
+
 fn main() {
 
     let x_res = 200;
@@ -13,10 +19,11 @@ fn main() {
             let g = j as f32 / y_res as f32 * 255.99;
             let b: f32 = 0.2 * 255.99;
 
-            let ir = r.floor();
-            let ig = g.floor();
-            let ib = b.floor();
-            println!("{} {} {}", ir, ig, ib);
+            //let ir = r.floor();
+            //let ig = g.floor();
+            //let ib = b.floor();
+            let outColour = Vector3::new(r.floor(), g.floor(), b.floor());
+            println!("{}", outColour);
         }
     }
 }
