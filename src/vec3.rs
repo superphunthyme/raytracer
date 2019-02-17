@@ -1,4 +1,3 @@
-use std::ops::Mul;
 use std::fmt;
 
 #[derive(Copy, Clone, PartialEq)]
@@ -79,7 +78,30 @@ impl std::ops::Add for Vector3 {
     }
 }
 
-impl Mul<f32> for Vector3 {
+impl std::ops::Sub for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, other: Vector3) -> Vector3 {
+        Vector3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z
+        }
+    }
+}
+
+impl std::ops::Neg for Vector3 {
+    type Output = Vector3;
+    fn neg(self) -> Vector3 {
+        Vector3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
+    }
+}
+
+impl std::ops::Mul<f32> for Vector3 {
    type Output = Vector3;
 
    fn mul(self, t: f32) -> Vector3 {
@@ -91,7 +113,7 @@ impl Mul<f32> for Vector3 {
    }
 }
 
-impl Mul<Vector3> for f32 {
+impl std::ops::Mul<Vector3> for f32 {
    type Output = Vector3;
 
    fn mul(self, v: Vector3) -> Vector3 {
