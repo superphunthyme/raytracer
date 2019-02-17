@@ -1,9 +1,10 @@
 mod camera;
 mod hitable;
-mod vec3;
+mod material;
 mod random;
 mod ray;
-mod material;
+mod sphere;
+mod vec3;
 use crate::vec3::Vector3;
 
 fn main() {

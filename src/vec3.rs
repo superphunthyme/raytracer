@@ -113,6 +113,18 @@ impl std::ops::Mul<f32> for Vector3 {
    }
 }
 
+impl std::ops::Div<f32> for Vector3 {
+   type Output = Vector3;
+
+   fn div(self, t: f32) -> Vector3 {
+       Vector3 {
+           x: self.x / t,
+           y: self.y / t,
+           z: self.z / t,
+       }
+   }
+}
+
 impl std::ops::Mul<Vector3> for f32 {
    type Output = Vector3;
 
