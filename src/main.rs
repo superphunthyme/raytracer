@@ -3,7 +3,6 @@ mod hitable;
 mod vec3;
 mod random;
 mod ray;
-mod hitable;
 mod material;
 use crate::vec3::Vector3;
 
