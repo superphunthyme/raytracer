@@ -4,7 +4,7 @@ use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vector3;
 
-struct Sphere {
+pub struct Sphere {
     center: Vector3,
     radius: f32,
     material: Material,
