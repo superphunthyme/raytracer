@@ -17,8 +17,8 @@ pub struct Camera {
 impl Camera {
     pub fn new(lookfrom: Vector3, lookat: Vector3, vup: Vector3, vfov: f32, aspect: f32, aperture :f32, focus_dist:f32) -> Camera {
         let lens_radius = aperture / 2.0;
-        let theta = vfov * f32::consts::PI;
-        let half_height = f32::tan(theta / 2.0);
+        let theta = vfov * f32::consts::PI / 180.0;
+        let half_height = (theta / 2.0).tan();
         let half_width = aspect * half_height;
 
         let origin = lookfrom;
