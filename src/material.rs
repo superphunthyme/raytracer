@@ -3,8 +3,8 @@ use crate::random;
 use crate::ray::Ray;
 use crate::vec3::Vector3;
 
-fn reflect(v: Vector3, n: &Vector3) -> Vector3 {
-    v - (v.dot(n) * 2.0) * *n
+fn reflect(v: &Vector3, n: &Vector3) -> Vector3 {
+    *v - (v.dot(n) * 2.0) * *n
 }
 
 fn refract(v: &Vector3, n: &Vector3, ni_over_nt: f32) -> Option<Vector3> {
@@ -66,7 +66,7 @@ impl Material {
                 }
             }
             Material::Metal {albedo, fuzz} => {
-                let reflected = reflect(r_in.direction(), &rec.normal);
+                let reflected = reflect(&r_in.direction(), &rec.normal);
                 let scattered = Ray::new(rec.p, reflected + random::random_in_unit_sphere() * f32::max(*fuzz, 1.0));
                 let should_scatter = scattered.direction().dot(&rec.normal) > 0.0;
                 ScatterRecord {
