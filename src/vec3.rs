@@ -90,6 +90,18 @@ impl std::ops::Sub for Vector3 {
     }
 }
 
+impl std::ops::Mul for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, other: Vector3) -> Vector3 {
+        Vector3 {
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z
+        }
+    }
+}
+
 impl std::ops::Neg for Vector3 {
     type Output = Vector3;
     fn neg(self) -> Vector3 {
