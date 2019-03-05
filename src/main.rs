@@ -9,7 +9,6 @@ use crate::vec3::Vector3;
 use crate::camera::Camera;
 use crate::hitable::Hitable;
 use crate::material::Material;
-use crate::material::ScatterRecord;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
 use std::f32;
@@ -53,18 +52,12 @@ fn main() {
     let lookfrom = Vector3::new(0.0, 0.0, 0.0);
     let lookat = Vector3::new(0.0, 0.0, -1.0);
     let vup = Vector3::new(0.0, 1.0, 0.0);
-    let lower_left_corner = Vector3::new(-2.0, -1.0, -1.0);
-    let horizontal = Vector3::new(4.0, 0.0, 0.0);
-    let vertical = Vector3::new(0.0, 2.0, 0.0);
     let dist_to_focus = (lookfrom - lookat).length();
     let aperture = 0.0;
     let cam = Camera::new(lookfrom, lookat, vup, 90.0, x_res as f32 / y_res as f32, aperture, dist_to_focus);
-    let s = Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5, Material::Lambertian{ albedo: Vector3::new(0.0, 1.0, 0.0)});
+    let s = Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5, Material::Metal{ albedo: Vector3::new(0.0, 1.0, 0.0), fuzz: 0.0});
     for j in (0..y_res).rev() {
         for i in 0..x_res {
-            let r = i as f32 / x_res as f32 * 255.99;
-            let g = j as f32 / y_res as f32 * 255.99;
-            let b: f32 = 0.2 * 255.99;
             //vec3 col(0, 0, 0);
             let u = i as f32 / x_res as f32;
             let v = j as f32 / y_res as f32;
