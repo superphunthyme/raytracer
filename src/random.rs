@@ -27,3 +27,7 @@ pub fn random_in_unit_sphere() -> Vector3 {
     }
     p
 }
+
+pub fn random_in_unit_interval() -> f32 {
+    rand::thread_rng().gen_range(0.0, 1.0)
+}

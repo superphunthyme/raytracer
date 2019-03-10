@@ -48,13 +48,49 @@ pub struct ScatterRecord {
 impl Material {
     pub fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> ScatterRecord {
         match self {
-            // FIXME This is wrong, just a placeholder for now
             Material::Dielectric {ri} => {
-                let target = rec.p + rec.normal + random::random_in_unit_sphere();
-                ScatterRecord {
-                    color: Vector3::new(0.0, 0.0, 0.0),
-                    ray: Ray::new(rec.p, target - rec.p),
-                    should_scatter: true,
+                let outward_normal;
+                let reflected = reflect(&r_in.direction(), &rec.normal);
+                let ni_over_nt;
+                let attenuation = Vector3::new(1.0, 1.0, 1.0);
+                let reflect_prob;
+                let cosine;
+                if r_in.direction().dot(&rec.normal) > 0.0 {
+                    outward_normal = -rec.normal;
+                    ni_over_nt = *ri;
+                    cosine = ri * r_in.direction().dot(&rec.normal) / r_in.direction().length();
+                }
+                else {
+                    outward_normal = rec.normal;
+                    ni_over_nt = 1.0 / *ri;
+                    cosine = -r_in.direction().dot(&rec.normal) / r_in.direction().length();
+                }
+
+                match refract(&r_in.direction(), &outward_normal, ni_over_nt) {
+                    Some(refracted) => {
+                        reflect_prob = schlick(cosine, *ri);
+                        if random::random_in_unit_interval() < reflect_prob {
+                            ScatterRecord {
+                                color: attenuation,
+                                ray: Ray::new(rec.p, reflected),
+                                should_scatter: true,
+                            }
+                        }
+                        else {
+                            ScatterRecord {
+                                color: attenuation,
+                                ray: Ray::new(rec.p, refracted),
+                                should_scatter: true,
+                            }
+                        }
+                    }
+                    None => {
+                        ScatterRecord {
+                            color: attenuation,
+                            ray: Ray::new(rec.p, reflected),
+                            should_scatter: true,
+                        }
+                    }
                 }
             }
             Material::Lambertian { albedo } => {
