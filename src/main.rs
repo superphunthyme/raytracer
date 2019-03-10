@@ -16,11 +16,10 @@ use rand::Rng;
 use std::f32;
 
 fn color<T: Hitable>(r: &Ray, s: &T, depth: u32) -> Vector3 {
-    let hr =  s.hit(r, 0.0, f32::MAX);
-    match hr {
-        Some(_hr) => {
+    match s.hit(r, 0.001, f32::MAX) {
+        Some(hr) => {
             if depth < 50 {
-                let scatter = _hr.material.scatter(r, &_hr);
+                let scatter = hr.material.scatter(r, &hr);
                 if scatter.should_scatter {
                     scatter.color * color(&scatter.ray, s, depth + 1)
                 }
@@ -59,13 +58,17 @@ fn main() {
     let aperture = 0.0;
     let cam = Camera::new(lookfrom, lookat, vup, 90.0, x_res as f32 / y_res as f32, aperture, dist_to_focus);
 
-    let sphere1 = Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5, Material::Metal{ albedo: Vector3::new(1.0, 0.0, 0.0), fuzz: 0.0});
+    let sphere1 = Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5, Material::Lambertian{ albedo: Vector3::new(0.1, 0.2, 0.5)});
     let sphere2 = Sphere::new(Vector3::new(0.0, -100.5, -1.0), 100.0, Material::Lambertian{ albedo: Vector3::new(0.8, 0.8, 0.0)});
-    let sphere3 = Sphere::new(Vector3::new(1.0, 0.0, -1.0), 0.5, Material::Lambertian{ albedo: Vector3::new(0.0, 0.0, 1.0)});
+    let sphere3 = Sphere::new(Vector3::new(1.0, 0.0, -1.0), 0.5, Material::Metal{ albedo: Vector3::new(0.8, 0.6, 0.2), fuzz: 0.0});
+    let sphere4 = Sphere::new(Vector3::new(-1.0, 0.0, -1.0), 0.5, Material::Dielectric{ ri: 1.5 });
+    let sphere5 = Sphere::new(Vector3::new(-1.0, 0.0, -1.0), -0.45, Material::Dielectric{ ri: 1.5 });
     let mut hitable_list = HitableList::new();
     hitable_list.add(sphere1);
     hitable_list.add(sphere2);
     hitable_list.add(sphere3);
+    hitable_list.add(sphere4);
+    hitable_list.add(sphere5);
 
     for j in (0..y_res).rev() {
         for i in 0..x_res {
