@@ -67,7 +67,7 @@ impl Material {
             }
             Material::Metal {albedo, fuzz} => {
                 let reflected = reflect(&r_in.direction(), &rec.normal);
-                let scattered = Ray::new(rec.p, reflected + random::random_in_unit_sphere() * f32::max(*fuzz, 1.0));
+                let scattered = Ray::new(rec.p, reflected + random::random_in_unit_sphere() * f32::min(*fuzz, 1.0));
                 let should_scatter = scattered.direction().dot(&rec.normal) > 0.0;
                 ScatterRecord {
                     color: *albedo,
