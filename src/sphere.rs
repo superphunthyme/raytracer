@@ -23,7 +23,7 @@ impl Sphere {
 impl Hitable for Sphere {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
     let oc: Vector3 = r.origin() - self.center;
-    let a = r.direction().dot(&r.direction());
+    let a = r.direction().length_squared();
     let b = oc.dot(&r.direction());
     let c = oc.dot(&oc) - self.radius * self.radius;
     let discriminant = b*b - a*c;

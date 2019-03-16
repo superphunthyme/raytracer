@@ -34,7 +34,12 @@ impl Vector3 {
     }
 
     pub fn length(&self) -> f32 {
-        f32::sqrt(self.x * self.x  + self.y * self.y + self.z * self.z)
+        (self.x * self.x  + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    // Useful for comparisons, including with 0,1
+    pub fn length_squared(&self) -> f32 {
+        self.x * self.x  + self.y * self.y + self.z * self.z
     }
 
     pub fn make_unit_vector(&mut self) {
