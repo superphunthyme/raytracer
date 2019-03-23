@@ -12,7 +12,11 @@ use crate::hitable::HitableList;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
+
+use std::io;
 use std::f32;
+use std::path::Path;
+use std::fs::File;
 
 extern crate clap;
 use clap::{Arg, App, SubCommand};
@@ -99,6 +103,18 @@ fn main() {
 
     let matches = App::new("Raytracer")
         .about("Raytracer in Rust from Peter Shirley's Raytracing in One Weekend")
+        .arg(Arg::with_name("output")
+             .short("o")
+             .long("output")
+             .value_name("FILE")
+             .takes_value(true)
+             .help("Output file. If not specified, wrties to stdout."))
+        .arg(Arg::with_name("samples")
+             .short("s")
+             .long("samples")
+             .takes_value(true)
+             .help("Samples per pixel")
+             .default_value("100"))
         .arg(Arg::with_name("x_res")
              .short("x")
              .long("x_res")
@@ -111,21 +127,27 @@ fn main() {
              .takes_value(true)
              .help("Height of trace in pixels")
              .default_value("100"))
-        .arg(Arg::with_name("samples")
-             .short("s")
-             .long("samples")
-             .takes_value(true)
-             .help("Samples per pixel")
-             .default_value("100"))
         .get_matches();
 
     let x_res: u32 = matches.value_of("x_res").unwrap().parse().unwrap();
     let y_res: u32 = matches.value_of("y_res").unwrap().parse().unwrap();
     let num_samples: u32 = matches.value_of("samples").unwrap().parse().unwrap();
+    let output_file = matches.value_of("output");
+
+    let mut output_writer = match output_file {
+        Some(x) => {
+            let path  = Path::new(x);
+            Box::new(File::create(&path).unwrap_or_else(|error| {
+                panic!("Failed to create output file {:?}", error)
+            })) as Box<io::Write>
+        }
+        None => Box::new(io::stdout()) as Box<io::Write>
+    };
+
     let colour_range = 255;
     
     // Rewrite as create_ppm
-    println!("P3\n{} {}\n{}\n", x_res, y_res, colour_range);
+    write!(output_writer, "P3\n{} {}\n{}\n", x_res, y_res, colour_range);
 
     let lookfrom = Vector3::new(13.0, 2.0, 3.0);
     let lookat = Vector3::new(0.0, 0.0, 0.0);
@@ -151,7 +173,7 @@ fn main() {
             col = Vector3::new(col.r().sqrt(), col.g().sqrt(), col.b().sqrt());
 
             let out_colour = Vector3::new((255.99 * col.r()).floor(), (255.99 * col.g()).floor(), (255.99 * col.b()).floor());
-            println!("{}", out_colour);
+            write!(output_writer, "{}\n", out_colour);
         }
     }
 }
