@@ -14,6 +14,9 @@ use crate::ray::Ray;
 use crate::sphere::Sphere;
 use std::f32;
 
+extern crate clap;
+use clap::{Arg, App, SubCommand};
+
 fn color<T: Hitable>(r: &Ray, s: &T, depth: u32) -> Vector3 {
     match s.hit(r, 0.001, f32::MAX) {
         Some(hr) => {
@@ -94,9 +97,31 @@ fn random_scene() -> HitableList {
 
 fn main() {
 
-    let x_res = 200;
-    let y_res = 100;
-    let num_samples = 100;
+    let matches = App::new("Raytracer")
+        .about("Raytracer in Rust from Peter Shirley's Raytracing in One Weekend")
+        .arg(Arg::with_name("x_res")
+             .short("x")
+             .long("x_res")
+             .takes_value(true)
+             .help("Width of trace in pixels")
+             .default_value("200"))
+        .arg(Arg::with_name("y_res")
+             .short("y")
+             .long("y_res")
+             .takes_value(true)
+             .help("Height of trace in pixels")
+             .default_value("100"))
+        .arg(Arg::with_name("samples")
+             .short("s")
+             .long("samples")
+             .takes_value(true)
+             .help("Samples per pixel")
+             .default_value("100"))
+        .get_matches();
+
+    let x_res: u32 = matches.value_of("x_res").unwrap().parse().unwrap();
+    let y_res: u32 = matches.value_of("y_res").unwrap().parse().unwrap();
+    let num_samples: u32 = matches.value_of("samples").unwrap().parse().unwrap();
     let colour_range = 255;
     
     // Rewrite as create_ppm
