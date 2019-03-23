@@ -19,7 +19,7 @@ use std::path::Path;
 use std::fs::File;
 
 extern crate clap;
-use clap::{Arg, App, SubCommand};
+use clap::{Arg, App};
 
 fn color<T: Hitable>(r: &Ray, s: &T, depth: u32) -> Vector3 {
     match s.hit(r, 0.001, f32::MAX) {
@@ -132,22 +132,27 @@ fn main() {
     let x_res: u32 = matches.value_of("x_res").unwrap().parse().unwrap();
     let y_res: u32 = matches.value_of("y_res").unwrap().parse().unwrap();
     let num_samples: u32 = matches.value_of("samples").unwrap().parse().unwrap();
-    let output_file = matches.value_of("output");
+    let output = matches.value_of("output");
 
-    let mut output_writer = match output_file {
+    let mut output_writer: Box<io::Write> = match output {
         Some(x) => {
             let path  = Path::new(x);
             Box::new(File::create(&path).unwrap_or_else(|error| {
                 panic!("Failed to create output file {:?}", error)
             })) as Box<io::Write>
         }
-        None => Box::new(io::stdout()) as Box<io::Write>
+        None => { 
+            Box::new(io::stdout()) as Box<io::Write>
+        }
     };
 
     let colour_range = 255;
     
     // Rewrite as create_ppm
-    write!(output_writer, "P3\n{} {}\n{}\n", x_res, y_res, colour_range);
+    match write!(output_writer, "P3\n{} {}\n{}\n", x_res, y_res, colour_range) {
+        Err(e) => panic!("Failed write: {}", e),
+        Ok(_) => ()
+    }
 
     let lookfrom = Vector3::new(13.0, 2.0, 3.0);
     let lookat = Vector3::new(0.0, 0.0, 0.0);
@@ -173,7 +178,10 @@ fn main() {
             col = Vector3::new(col.r().sqrt(), col.g().sqrt(), col.b().sqrt());
 
             let out_colour = Vector3::new((255.99 * col.r()).floor(), (255.99 * col.g()).floor(), (255.99 * col.b()).floor());
-            write!(output_writer, "{}\n", out_colour);
+            match write!(output_writer, "{}\n", out_colour) {
+                Err(e) => panic!("Failed write: {}", e),
+                Ok(_) => ()
+            }
         }
     }
 }
