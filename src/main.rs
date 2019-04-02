@@ -15,10 +15,10 @@ use crate::vec3::Vector3;
 
 use std::f32;
 use std::fs::File;
-use std::io;
+use std::io::{BufWriter, Write, stdout};
 use std::path::Path;
 
-use std::sync::{mpsc, Arc, Mutex};
+use std::sync::{Arc, Mutex};
 use std::thread;
 
 extern crate clap;
@@ -172,15 +172,15 @@ fn main() {
     let num_threads: u32 = matches.value_of("threads").unwrap().parse().unwrap();
     let output = matches.value_of("output");
 
-    let mut output_writer: Box<io::Write> = match output {
+    let mut output_writer: Box<Write> = match output {
         Some(x) => {
             let path = Path::new(x);
-            Box::new(
+            Box::new(BufWriter::new(
                 File::create(&path)
-                    .unwrap_or_else(|error| panic!("Failed to create output file {:?}", error)),
-            ) as Box<io::Write>
+                    .unwrap_or_else(|error| panic!("Failed to create output file {:?}", error))),
+            ) as Box<Write>
         }
-        None => Box::new(io::stdout()) as Box<io::Write>,
+        None => Box::new(stdout()) as Box<Write>,
     };
 
     let colour_range = 255;
@@ -251,29 +251,6 @@ fn main() {
             }
         }));
     }
-
-    //for j in (0..y_res).rev() {
-    //    for i in 0..x_res {
-    //        let mut col = Vector3::new(0.0, 0.0, 0.0);
-    //        for _s in 0..num_samples {
-    //            let u_rand = random::random_in_unit_interval();
-    //            let v_rand = random::random_in_unit_interval();
-    //            let u = (i as f32 + u_rand) / x_res as f32;
-    //            let v = (j as f32 + v_rand) / y_res as f32;
-    //            let ray = cam.get_ray(u, v);
-    //            col = col + color(&ray, &hitable_list, 0);
-    //        }
-    //        col = col / num_samples as f32;
-    //        col = Vector3::new(col.r().sqrt(), col.g().sqrt(), col.b().sqrt());
-
-    //        let out_colour = Vector3::new((255.99 * col.r()).floor(), (255.99 * col.g()).floor(), (255.99 * col.b()).floor());
-    //        match write!(output_writer, "{}\n", out_colour) {
-    //            Err(e) => panic!("Failed write: {}", e),
-    //            Ok(_) => ()
-    //        }
-    //    }
-    //}
-    //
 
     for thread in thread_handles {
         thread.join().unwrap();
