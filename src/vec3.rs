@@ -11,15 +11,27 @@ impl Vector3 {
     // Use Option to allow for empty contructor
 
     pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
-        Vector3{x, y, z}
+        Vector3 { x, y, z }
     }
 
-    pub fn x(&self) -> f32 { self.x }
-    pub fn y(&self) -> f32 { self.y }
-    pub fn z(&self) -> f32 { self.z }
-    pub fn r(&self) -> f32 { self.x }
-    pub fn g(&self) -> f32 { self.y }
-    pub fn b(&self) -> f32 { self.z }
+    pub fn x(&self) -> f32 {
+        self.x
+    }
+    pub fn y(&self) -> f32 {
+        self.y
+    }
+    pub fn z(&self) -> f32 {
+        self.z
+    }
+    pub fn r(&self) -> f32 {
+        self.x
+    }
+    pub fn g(&self) -> f32 {
+        self.y
+    }
+    pub fn b(&self) -> f32 {
+        self.z
+    }
 
     pub fn cross(&self, other: &Vector3) -> Vector3 {
         Vector3 {
@@ -34,12 +46,12 @@ impl Vector3 {
     }
 
     pub fn length(&self) -> f32 {
-        (self.x * self.x  + self.y * self.y + self.z * self.z).sqrt()
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
     // Useful for comparisons, including with 0,1
     pub fn length_squared(&self) -> f32 {
-        self.x * self.x  + self.y * self.y + self.z * self.z
+        self.x * self.x + self.y * self.y + self.z * self.z
     }
 
     pub fn make_unit_vector(&mut self) {
@@ -59,8 +71,7 @@ impl Vector3 {
                 y: self.y / len,
                 z: self.z / len,
             }
-        }
-        else {
+        } else {
             Vector3 {
                 x: 0.0,
                 y: 0.0,
@@ -70,7 +81,6 @@ impl Vector3 {
     }
 }
 
-
 impl std::ops::Add for Vector3 {
     type Output = Vector3;
 
@@ -78,7 +88,19 @@ impl std::ops::Add for Vector3 {
         Vector3 {
             x: self.x + other.x,
             y: self.y + other.y,
-            z: self.z + other.z
+            z: self.z + other.z,
+        }
+    }
+}
+
+impl std::ops::Add for &Vector3 {
+    type Output = Vector3;
+
+    fn add(self, other: &Vector3) -> Vector3 {
+        Vector3 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
         }
     }
 }
@@ -90,7 +112,7 @@ impl std::ops::Sub for Vector3 {
         Vector3 {
             x: self.x - other.x,
             y: self.y - other.y,
-            z: self.z - other.z
+            z: self.z - other.z,
         }
     }
 }
@@ -102,7 +124,7 @@ impl std::ops::Mul for Vector3 {
         Vector3 {
             x: self.x * other.x,
             y: self.y * other.y,
-            z: self.z * other.z
+            z: self.z * other.z,
         }
     }
 }
@@ -119,39 +141,39 @@ impl std::ops::Neg for Vector3 {
 }
 
 impl std::ops::Mul<f32> for Vector3 {
-   type Output = Vector3;
+    type Output = Vector3;
 
-   fn mul(self, t: f32) -> Vector3 {
-       Vector3 {
-           x: self.x * t,
-           y: self.y * t,
-           z: self.z * t,
-       }
-   }
+    fn mul(self, t: f32) -> Vector3 {
+        Vector3 {
+            x: self.x * t,
+            y: self.y * t,
+            z: self.z * t,
+        }
+    }
 }
 
 impl std::ops::Div<f32> for Vector3 {
-   type Output = Vector3;
+    type Output = Vector3;
 
-   fn div(self, t: f32) -> Vector3 {
-       Vector3 {
-           x: self.x / t,
-           y: self.y / t,
-           z: self.z / t,
-       }
-   }
+    fn div(self, t: f32) -> Vector3 {
+        Vector3 {
+            x: self.x / t,
+            y: self.y / t,
+            z: self.z / t,
+        }
+    }
 }
 
 impl std::ops::Mul<Vector3> for f32 {
-   type Output = Vector3;
+    type Output = Vector3;
 
-   fn mul(self, v: Vector3) -> Vector3 {
-       Vector3 {
-           x: self * v.x(),
-           y: self * v.y(),
-           z: self * v.z(),
-       }
-   }
+    fn mul(self, v: Vector3) -> Vector3 {
+        Vector3 {
+            x: self * v.x(),
+            y: self * v.y(),
+            z: self * v.z(),
+        }
+    }
 }
 
 impl fmt::Display for Vector3 {
@@ -164,8 +186,8 @@ impl fmt::Display for Vector3 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
-    // These tests are a bit bland, but the point of this is learning anyway 
+
+    // These tests are a bit bland, but the point of this is learning anyway
 
     // Thanks https://mathinsight.org/cross_product_examples
     #[test]
@@ -192,13 +214,12 @@ mod tests {
         assert_eq!(f_test, f_result);
     }
 
-    
     #[test]
     fn test_add_postive() {
         let vec1 = Vector3::new(1.0, 2.0, 3.0);
         let vec2 = Vector3::new(1.5, 2.5, 3.5);
         let vec_result = vec1 + vec2;
-        
+
         assert_eq!(vec_result.x, 1.0 + 1.5);
         assert_eq!(vec_result.y, 2.0 + 2.5);
         assert_eq!(vec_result.z, 3.0 + 3.5);

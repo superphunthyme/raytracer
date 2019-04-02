@@ -13,8 +13,7 @@ fn refract(v: &Vector3, n: &Vector3, ni_over_nt: f32) -> Option<Vector3> {
     let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
     if discriminant > 0.0 {
         Some(ni_over_nt * (uv - *n * dt) - *n * discriminant.sqrt())
-    }
-    else {
+    } else {
         None
     }
 }
@@ -27,16 +26,9 @@ fn schlick(cosine: f32, ref_idx: f32) -> f32 {
 
 #[derive(Clone)]
 pub enum Material {
-    Dielectric {
-        ri: f32,
-    },
-    Lambertian {
-        albedo: Vector3,
-    },
-    Metal {
-        albedo: Vector3,
-        fuzz: f32
-    },
+    Dielectric { ri: f32 },
+    Lambertian { albedo: Vector3 },
+    Metal { albedo: Vector3, fuzz: f32 },
 }
 
 pub struct ScatterRecord {
@@ -48,7 +40,7 @@ pub struct ScatterRecord {
 impl Material {
     pub fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> ScatterRecord {
         match self {
-            Material::Dielectric {ri} => {
+            Material::Dielectric { ri } => {
                 let outward_normal;
                 let reflected = reflect(&r_in.direction(), &rec.normal);
                 let ni_over_nt;
@@ -59,8 +51,7 @@ impl Material {
                     outward_normal = -rec.normal;
                     ni_over_nt = *ri;
                     cosine = ri * r_in.direction().dot(&rec.normal) / r_in.direction().length();
-                }
-                else {
+                } else {
                     outward_normal = rec.normal;
                     ni_over_nt = 1.0 / *ri;
                     cosine = -r_in.direction().dot(&rec.normal) / r_in.direction().length();
@@ -75,8 +66,7 @@ impl Material {
                                 ray: Ray::new(rec.p, reflected),
                                 should_scatter: true,
                             }
-                        }
-                        else {
+                        } else {
                             ScatterRecord {
                                 color: attenuation,
                                 ray: Ray::new(rec.p, refracted),
@@ -84,13 +74,11 @@ impl Material {
                             }
                         }
                     }
-                    None => {
-                        ScatterRecord {
-                            color: attenuation,
-                            ray: Ray::new(rec.p, reflected),
-                            should_scatter: true,
-                        }
-                    }
+                    None => ScatterRecord {
+                        color: attenuation,
+                        ray: Ray::new(rec.p, reflected),
+                        should_scatter: true,
+                    },
                 }
             }
             Material::Lambertian { albedo } => {
@@ -101,9 +89,12 @@ impl Material {
                     should_scatter: true,
                 }
             }
-            Material::Metal {albedo, fuzz} => {
+            Material::Metal { albedo, fuzz } => {
                 let reflected = reflect(&r_in.direction(), &rec.normal);
-                let scattered = Ray::new(rec.p, reflected + random::random_in_unit_sphere() * f32::min(*fuzz, 1.0));
+                let scattered = Ray::new(
+                    rec.p,
+                    reflected + random::random_in_unit_sphere() * f32::min(*fuzz, 1.0),
+                );
                 let should_scatter = scattered.direction().dot(&rec.normal) > 0.0;
                 ScatterRecord {
                     color: *albedo,

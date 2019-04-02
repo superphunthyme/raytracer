@@ -1,17 +1,13 @@
 use crate::vec3::Vector3;
 
-pub struct Ray
-{
+pub struct Ray {
     origin: Vector3,
     direction: Vector3,
 }
 
 impl Ray {
     pub fn new(origin: Vector3, direction: Vector3) -> Ray {
-        Ray {
-            origin,
-            direction
-        }
+        Ray { origin, direction }
     }
     pub fn origin(&self) -> Vector3 {
         self.origin

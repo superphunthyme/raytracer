@@ -1,6 +1,6 @@
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vector3;
-use crate::material::Material;
 
 #[derive(Clone)]
 pub struct HitRecord {
@@ -10,12 +10,32 @@ pub struct HitRecord {
     pub material: Material,
 }
 
-pub trait Hitable {
+pub trait Hitable: HitableClone {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
 }
 
+pub trait HitableClone {
+    fn clone_box(&self) -> Box<Hitable + Send>;
+}
+
+#[derive(Clone)]
 pub struct HitableList {
-    hitables: Vec<Box<dyn Hitable>>
+    hitables: Vec<Box<dyn Hitable + Send>>,
+}
+
+impl<T> HitableClone for T
+where
+    T: 'static + Hitable + Clone + Send,
+{
+    fn clone_box(&self) -> Box<Hitable + Send> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn Hitable + Send> {
+    fn clone(&self) -> Box<Hitable + Send> {
+        self.clone_box()
+    }
 }
 
 impl HitableList {
@@ -25,7 +45,7 @@ impl HitableList {
         }
     }
 
-    pub fn add<T: Hitable + 'static>(&mut self, item: T) {
+    pub fn add<T: Hitable + 'static + Send>(&mut self, item: T) {
         self.hitables.push(Box::new(item));
     }
 }
@@ -39,8 +59,8 @@ impl Hitable for HitableList {
                 Some(hr) => {
                     closest_so_far = hr.t;
                     temp_rec = Some(hr);
-                },
-                None => ()
+                }
+                None => (),
             }
         }
         temp_rec
