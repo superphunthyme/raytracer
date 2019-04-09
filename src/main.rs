@@ -4,6 +4,7 @@ mod material;
 mod random;
 mod ray;
 mod sphere;
+mod triangle;
 mod vec3;
 use crate::camera::Camera;
 use crate::hitable::Hitable;
@@ -11,6 +12,7 @@ use crate::hitable::HitableList;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
+use crate::triangle::Triangle;
 use crate::vec3::Vector3;
 
 use std::f32;
