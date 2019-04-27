@@ -268,7 +268,7 @@ fn main() {
             (255.99 * col.b().sqrt()).floor(),
         );
         //out_colour = Vector3::new((255.99 * col.r()).floor(), (255.99 * col.g()).floor(), (255.99 * col.b()).floor());
-        match write!(output_writer, "{}\n", out_colour) {
+        match write!(output_writer, "{} {} {}\n", out_colour.r(), out_colour.g(), out_colour.b()) {
             Err(e) => panic!("Failed write: {}", e),
             Ok(_) => (),
         }
