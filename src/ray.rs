@@ -25,6 +25,11 @@ impl Ray {
 
 impl fmt::Display for Ray {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "origin: {}, direction: {}", self.origin(), self.direction())
+        write!(
+            f,
+            "origin: {}, direction: {}",
+            self.origin(),
+            self.direction()
+        )
     }
 }

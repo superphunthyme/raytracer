@@ -46,10 +46,10 @@ impl Hitable for Triangle {
             return None;
         }
 
-        let tvec = (r.origin() - self.v1);
+        let tvec = r.origin() - self.v1;
 
         // (u,v) Barycentric coordinates
-        let mut u = tvec.dot(&pvec);
+        let u = tvec.dot(&pvec);
         if det > 0.0 {
             if u < 0.0 || u > det {
                 return None;
@@ -61,7 +61,7 @@ impl Hitable for Triangle {
         }
 
         let qvec = tvec.cross(&edge1);
-        let mut v = r.direction().dot(&qvec);
+        let v = r.direction().dot(&qvec);
         if det > 0.0 {
             if v < 0.0 || u + v > det {
                 return None;
@@ -76,8 +76,6 @@ impl Hitable for Triangle {
         let inv_det = 1.0 / det;
         let mut t = edge2.dot(&qvec);
         t *= inv_det;
-        u *= inv_det;
-        v *= inv_det;
 
         // Normal
         // TODO Could also calculate this once and store with the triangle

@@ -12,12 +12,11 @@ use crate::hitable::HitableList;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
-use crate::triangle::Triangle;
 use crate::vec3::Vector3;
 
 use std::f32;
 use std::fs::File;
-use std::io::{BufWriter, Write, stdout};
+use std::io::{stdout, BufWriter, Write};
 use std::path::Path;
 
 use std::sync::{Arc, Mutex};
@@ -177,10 +176,9 @@ fn main() {
     let mut output_writer: Box<Write> = match output {
         Some(x) => {
             let path = Path::new(x);
-            Box::new(BufWriter::new(
-                File::create(&path)
-                    .unwrap_or_else(|error| panic!("Failed to create output file {:?}", error))),
-            ) as Box<Write>
+            Box::new(BufWriter::new(File::create(&path).unwrap_or_else(
+                |error| panic!("Failed to create output file {:?}", error),
+            ))) as Box<Write>
         }
         None => Box::new(stdout()) as Box<Write>,
     };
@@ -215,7 +213,7 @@ fn main() {
     let hitable_list = random_scene();
 
     let mut thread_handles = Vec::new();
-    let mut result = Arc::new(Mutex::new(Vec::new()));
+    let result = Arc::new(Mutex::new(Vec::new()));
     let samples_per_thread = num_samples / num_threads;
 
     for _ in 0..num_threads {
@@ -259,7 +257,7 @@ fn main() {
     }
 
     // Should buffer and only write to the file at the end
-    for mut col in result.lock().unwrap().iter() {
+    for col in result.lock().unwrap().iter() {
         //let mut col = result.lock().unwrap()[(i + j * y_res) as usize];
         //let out_colour = Vector3::new(col.r().sqrt(), col.g().sqrt(), col.b().sqrt());
         let out_colour = Vector3::new(
@@ -268,7 +266,13 @@ fn main() {
             (255.99 * col.b().sqrt()).floor(),
         );
         //out_colour = Vector3::new((255.99 * col.r()).floor(), (255.99 * col.g()).floor(), (255.99 * col.b()).floor());
-        match write!(output_writer, "{} {} {}\n", out_colour.r(), out_colour.g(), out_colour.b()) {
+        match write!(
+            output_writer,
+            "{} {} {}\n",
+            out_colour.r(),
+            out_colour.g(),
+            out_colour.b()
+        ) {
             Err(e) => panic!("Failed write: {}", e),
             Ok(_) => (),
         }
