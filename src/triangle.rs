@@ -6,6 +6,8 @@ use crate::vec3::Vector3;
 use std::f32;
 use std::fmt;
 
+extern crate tobj;
+
 #[derive(Clone)]
 pub struct Triangle {
     v1: Vector3,

@@ -12,6 +12,7 @@ use crate::hitable::HitableList;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::sphere::Sphere;
+use crate::triangle::Triangle;
 use crate::vec3::Vector3;
 
 use std::f32;
@@ -24,6 +25,8 @@ use std::thread;
 
 extern crate clap;
 use clap::{App, Arg};
+
+extern crate tobj;
 
 fn color<T: Hitable>(r: &Ray, s: &T, depth: u32) -> Vector3 {
     match s.hit(r, 0.001, f32::MAX) {
@@ -122,6 +125,98 @@ fn random_scene() -> HitableList {
     hitable_list
 }
 
+fn load_obj() -> HitableList {
+    let cornell_box = tobj::load_obj(&Path::new("torus.obj"));
+    assert!(cornell_box.is_ok());
+    let mut hitable_list = HitableList::new();
+    let (models, _materials) = cornell_box.unwrap();
+
+    for model in &models {
+        let mesh = &model.mesh;
+
+        for f in 0..mesh.indices.len() / 3 {
+            println!(
+                "    idx[{}] = {}, {}, {}.",
+                f,
+                mesh.indices[3 * f],
+                mesh.indices[3 * f + 1],
+                mesh.indices[3 * f + 2]
+                );
+        }
+        for idx in 0..mesh.indices.len() / 3 {
+            let v1_x = mesh.positions[3 * mesh.indices[3 * idx] as usize];
+            let v1_y = mesh.positions[3 * mesh.indices[3 * idx] as usize + 1];
+            let v1_z = mesh.positions[3 * mesh.indices[3 * idx] as usize + 2];
+
+            let v2_x = mesh.positions[3 * mesh.indices[3 * idx + 1] as usize];
+            let v2_y = mesh.positions[3 * mesh.indices[3 * idx + 1] as usize + 1];
+            let v2_z = mesh.positions[3 * mesh.indices[3 * idx + 1] as usize + 2];
+
+            let v3_x = mesh.positions[3 * mesh.indices[3 * idx + 2] as usize];
+            let v3_y = mesh.positions[3 * mesh.indices[3 * idx + 2] as usize + 1];
+            let v3_z = mesh.positions[3 * mesh.indices[3 * idx + 2] as usize + 2];
+
+            let v1 = Vector3::new(
+                v1_x,
+                v1_y,
+                v1_z,
+                );
+            let v2 = Vector3::new(
+                v2_x,
+                v2_y,
+                v2_z,
+                );
+            let v3 = Vector3::new(
+                v3_x,
+                v3_y,
+                v3_z,
+                );
+            let new_triangle = Triangle::new(
+                v1,
+                v2,
+                v3,
+                Material::Lambertian {
+                    albedo: Vector3::new(1.0, 0.0, 0.0),
+                },
+                );
+            hitable_list.add(new_triangle);
+        }
+    }
+
+    hitable_list.add(Sphere::new(
+        Vector3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        Material::Lambertian {
+            albedo: Vector3::new(0.5, 0.5, 0.5),
+        },
+    ));
+
+    hitable_list.add(Sphere::new(
+        Vector3::new(0.0, 1.0, 0.0),
+        1.0,
+        Material::Dielectric { ri: 1.5 },
+    ));
+    hitable_list.add(Sphere::new(
+        Vector3::new(-4.0, 1.0, 0.0),
+        1.0,
+        Material::Lambertian {
+            albedo: Vector3::new(0.4, 0.2, 0.1),
+        },
+    ));
+    hitable_list.add(Sphere::new(
+        Vector3::new(4.0, 1.0, 0.0),
+        1.0,
+        Material::Metal {
+            albedo: Vector3::new(0.7, 0.6, 0.5),
+            fuzz: 0.0,
+        },
+    ));
+
+    hitable_list
+
+    // pos = [x, y, z]
+}
+
 fn main() {
     let matches = App::new("Raytracer")
         .about("Raytracer in Rust from Peter Shirley's Raytracing in One Weekend")
@@ -210,7 +305,7 @@ fn main() {
         dist_to_focus,
     );
 
-    let hitable_list = random_scene();
+    let hitable_list = load_obj();
 
     let mut thread_handles = Vec::new();
     let result = Arc::new(Mutex::new(Vec::new()));
