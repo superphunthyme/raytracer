@@ -6,13 +6,13 @@ A simple raytracer in Rust based on Peter Shirley's
 
 ## Usage
 
-``` shell
+```
 cargo run --release -- <options>
 ```
 
 ## Help
 
-``` shell
+```
 USAGE:
     raytracer [OPTIONS]
 
