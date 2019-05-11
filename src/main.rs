@@ -138,7 +138,7 @@ fn main() {
                 .short("s")
                 .long("samples")
                 .takes_value(true)
-                .help("Numner of samples per pixel")
+                .help("Number of samples per pixel")
                 .default_value("100"),
         )
         .arg(
