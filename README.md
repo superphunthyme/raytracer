@@ -36,4 +36,5 @@ same book, but here is an example:
 ![Raytracer output: a few dozen raytraced spheres in a scene.](./images/random_scene.png "Sample
 output.")
 
-(Output is currently a .ppm; this file was converted.)
+Output format is deduced from the extension. Most formats aren't supported, but
+.jpg and .png will work.

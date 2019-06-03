@@ -1,11 +1,11 @@
-mod camera;
-mod hitable;
-mod material;
-mod random;
-mod ray;
-mod sphere;
-mod triangle;
-mod vec3;
+use std::f32;
+
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+extern crate clap;
+use clap::{App, Arg};
+
 use crate::camera::Camera;
 use crate::hitable::Hitable;
 use crate::hitable::HitableList;
@@ -14,16 +14,15 @@ use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::Vector3;
 
-use std::f32;
-use std::fs::File;
-use std::io::{stdout, BufWriter, Write};
-use std::path::Path;
-
-use std::sync::{Arc, Mutex};
-use std::thread;
-
-extern crate clap;
-use clap::{App, Arg};
+mod camera;
+mod hitable;
+mod image_out;
+mod material;
+mod random;
+mod ray;
+mod sphere;
+mod triangle;
+mod vec3;
 
 fn color<T: Hitable>(r: &Ray, s: &T, depth: u32) -> Vector3 {
     match s.hit(r, 0.001, f32::MAX) {
@@ -173,28 +172,6 @@ fn main() {
     let num_threads: u32 = matches.value_of("threads").unwrap().parse().unwrap();
     let output = matches.value_of("output");
 
-    let mut output_writer: Box<Write> = match output {
-        Some(x) => {
-            let path = Path::new(x);
-            Box::new(BufWriter::new(File::create(&path).unwrap_or_else(
-                |error| panic!("Failed to create output file {:?}", error),
-            ))) as Box<Write>
-        }
-        None => Box::new(stdout()) as Box<Write>,
-    };
-
-    let colour_range = 255;
-
-    // Rewrite as create_ppm
-    match write!(
-        output_writer,
-        "P3\n{} {}\n{}\n\n",
-        x_res, y_res, colour_range
-    ) {
-        Err(e) => panic!("Failed write: {}", e),
-        Ok(_) => (),
-    }
-
     let lookfrom = Vector3::new(13.0, 2.0, 3.0);
     let lookat = Vector3::new(0.0, 0.0, 0.0);
     let vup = Vector3::new(0.0, 1.0, 0.0);
@@ -256,25 +233,20 @@ fn main() {
         thread.join().unwrap();
     }
 
+    let mut output_buffer: Vec<u8> = Vec::with_capacity(x_res as usize * y_res as usize * 3);
+
     // Should buffer and only write to the file at the end
     for col in result.lock().unwrap().iter() {
-        //let mut col = result.lock().unwrap()[(i + j * y_res) as usize];
-        //let out_colour = Vector3::new(col.r().sqrt(), col.g().sqrt(), col.b().sqrt());
         let out_colour = Vector3::new(
             (255.99 * col.r().sqrt()).floor(),
             (255.99 * col.g().sqrt()).floor(),
             (255.99 * col.b().sqrt()).floor(),
         );
-        //out_colour = Vector3::new((255.99 * col.r()).floor(), (255.99 * col.g()).floor(), (255.99 * col.b()).floor());
-        match write!(
-            output_writer,
-            "{} {} {}\n",
-            out_colour.r(),
-            out_colour.g(),
-            out_colour.b()
-        ) {
-            Err(e) => panic!("Failed write: {}", e),
-            Ok(_) => (),
-        }
+
+        output_buffer.push(out_colour.r() as u8);
+        output_buffer.push(out_colour.g() as u8);
+        output_buffer.push(out_colour.b() as u8);
     }
+
+    image_out::write_image(output, &output_buffer, x_res, y_res);
 }
