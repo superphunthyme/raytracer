@@ -15,7 +15,7 @@ pub trait Hitable: HitableClone {
 }
 
 pub trait HitableClone {
-    fn clone_box(&self) -> Box<Hitable + Send>;
+    fn clone_box(&self) -> Box<dyn Hitable + Send>;
 }
 
 #[derive(Clone)]
@@ -27,13 +27,13 @@ impl<T> HitableClone for T
 where
     T: 'static + Hitable + Clone + Send,
 {
-    fn clone_box(&self) -> Box<Hitable + Send> {
+    fn clone_box(&self) -> Box<dyn Hitable + Send> {
         Box::new(self.clone())
     }
 }
 
 impl Clone for Box<dyn Hitable + Send> {
-    fn clone(&self) -> Box<Hitable + Send> {
+    fn clone(&self) -> Box<dyn Hitable + Send> {
         self.clone_box()
     }
 }
