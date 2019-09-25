@@ -6,6 +6,8 @@ use std::thread;
 extern crate clap;
 use clap::{App, Arg};
 
+use crate::aabb::AABB;
+use crate::bvh::BVHNode;
 use crate::camera::Camera;
 use crate::hitable::Hitable;
 use crate::hitable::HitableList;
@@ -14,6 +16,8 @@ use crate::ray::Ray;
 use crate::sphere::Sphere;
 use crate::vec3::Vector3;
 
+mod aabb;
+mod bvh;
 mod camera;
 mod hitable;
 mod image_out;
@@ -188,6 +192,7 @@ fn main() {
     );
 
     let hitable_list = random_scene();
+    let bvh = BVHNode::new(hitable_list.hitables.clone());
 
     let mut thread_handles = Vec::new();
     let result = Arc::new(Mutex::new(Vec::new()));
@@ -195,7 +200,7 @@ fn main() {
 
     for _ in 0..num_threads {
         let mut thread_output = Vec::new();
-        let hitable_list_clone = hitable_list.clone();
+        let bvh_clone = bvh.clone();
         let result = Arc::clone(&result);
         // TODO Handle exceptions + num_samples not divisible by num_threads
         thread_handles.push(thread::spawn(move || {
@@ -208,7 +213,7 @@ fn main() {
                         let u = (i as f32 + u_rand) / x_res as f32;
                         let v = (j as f32 + v_rand) / y_res as f32;
                         let ray = cam.get_ray(u, v);
-                        col = col + color(&ray, &hitable_list_clone, 0);
+                        col = col + color(&ray, &bvh_clone, 0);
                     }
                     col = col / num_samples as f32;
                     thread_output.push(col);

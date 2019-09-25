@@ -1,3 +1,4 @@
+use crate::aabb::AABB;
 use crate::hitable::HitRecord;
 use crate::hitable::Hitable;
 use crate::material::Material;
@@ -93,6 +94,21 @@ impl Hitable for Triangle {
         } else {
             return None;
         }
+    }
+
+    fn bounding_box(&self) -> Option<AABB> {
+        let min_x = self.v1.x().min(self.v2.x()).min(self.v3.x());
+        let min_y = self.v1.y().min(self.v2.y()).min(self.v3.y());
+        let min_z = self.v1.z().min(self.v2.z()).min(self.v3.z());
+
+        let max_x = self.v1.x().min(self.v2.x()).min(self.v3.x());
+        let max_y = self.v1.y().min(self.v2.y()).min(self.v3.y());
+        let max_z = self.v1.z().min(self.v2.z()).min(self.v3.z());
+
+        Some(AABB::new(
+            Vector3::new(min_x, min_y, min_z),
+            Vector3::new(max_x, max_y, max_z),
+        ))
     }
 }
 

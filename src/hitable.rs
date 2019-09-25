@@ -1,3 +1,4 @@
+use crate::aabb::AABB;
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vector3;
@@ -12,6 +13,7 @@ pub struct HitRecord {
 
 pub trait Hitable: HitableClone {
     fn hit(&self, r: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
+    fn bounding_box(&self) -> Option<AABB>;
 }
 
 pub trait HitableClone {
@@ -20,7 +22,7 @@ pub trait HitableClone {
 
 #[derive(Clone)]
 pub struct HitableList {
-    hitables: Vec<Box<dyn Hitable + Send>>,
+    pub hitables: Vec<Box<dyn Hitable + Send>>,
 }
 
 impl<T> HitableClone for T
@@ -48,6 +50,10 @@ impl HitableList {
     pub fn add<T: Hitable + 'static + Send>(&mut self, item: T) {
         self.hitables.push(Box::new(item));
     }
+
+    pub fn len(&mut self) -> usize {
+        self.hitables.len()
+    }
 }
 
 impl Hitable for HitableList {
@@ -64,5 +70,26 @@ impl Hitable for HitableList {
             }
         }
         temp_rec
+    }
+
+    fn bounding_box(&self) -> Option<AABB> {
+        if self.hitables.len() < 1 {
+            return None;
+        }
+
+        let mut list_box;
+        match self.hitables[0].bounding_box() {
+            Some(first) => list_box = first,
+            None => return None,
+        };
+
+        for hitable in self.hitables.iter() {
+            match hitable.bounding_box() {
+                Some(first) => list_box = list_box.surrounding_box(&first),
+                None => return None,
+            };
+        }
+
+        return Some(list_box);
     }
 }

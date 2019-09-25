@@ -1,3 +1,4 @@
+use crate::aabb::AABB;
 use crate::hitable::HitRecord;
 use crate::hitable::Hitable;
 use crate::material::Material;
@@ -53,5 +54,12 @@ impl Hitable for Sphere {
             }
         }
         return None;
+    }
+
+    fn bounding_box(&self) -> Option<AABB> {
+        Some(AABB::new(
+            self.center - Vector3::new(self.radius, self.radius, self.radius),
+            self.center + Vector3::new(self.radius, self.radius, self.radius),
+        ))
     }
 }
