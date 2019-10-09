@@ -5,7 +5,6 @@ use crate::random;
 use crate::ray::Ray;
 use std::cmp::PartialOrd;
 
-
 // TODO Look into typedefs in Rust, especially for the Box<dyn Hitable + Send>
 // TODO Enum for axis
 //fn box_compare(axis: u32) -> Box<FnMut(Box<dyn Hitable + Send>, Box<dyn Hitable + Send>) -> Ordering> {

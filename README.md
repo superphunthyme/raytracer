@@ -36,5 +36,13 @@ same book, but here is an example:
 ![Raytracer output: a few dozen raytraced spheres in a scene.](./images/random_scene.png "Sample
 output.")
 
+And an example with a light source:
+![Raytracer output: a few dozen raytraced spheres illuminated by a light source.](./images/first_light.png "Sample
+output.")
+
 Output format is deduced from the extension. Most formats aren't supported, but
 .jpg and .png will work.
+
+## Notes
+If you specify less samples than threads, you will see a black image.
+This is because of an oversimplified work-splitting calculation.

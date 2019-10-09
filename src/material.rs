@@ -29,16 +29,16 @@ pub enum Material {
     Dielectric { ri: f32 },
     Lambertian { albedo: Vector3 },
     Metal { albedo: Vector3, fuzz: f32 },
+    DiffuseLight { color: Vector3 },
 }
 
 pub struct ScatterRecord {
     pub color: Vector3,
     pub ray: Ray,
-    pub should_scatter: bool,
 }
 
 impl Material {
-    pub fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> ScatterRecord {
+    pub fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<ScatterRecord> {
         match self {
             Material::Dielectric { ri } => {
                 let outward_normal;
@@ -61,33 +61,29 @@ impl Material {
                     Some(refracted) => {
                         reflect_prob = schlick(cosine, *ri);
                         if random::random_in_unit_interval() < reflect_prob {
-                            ScatterRecord {
+                            Some(ScatterRecord {
                                 color: attenuation,
                                 ray: Ray::new(rec.p, reflected),
-                                should_scatter: true,
-                            }
+                            })
                         } else {
-                            ScatterRecord {
+                            Some(ScatterRecord {
                                 color: attenuation,
                                 ray: Ray::new(rec.p, refracted),
-                                should_scatter: true,
-                            }
+                            })
                         }
                     }
-                    None => ScatterRecord {
+                    None => Some(ScatterRecord {
                         color: attenuation,
                         ray: Ray::new(rec.p, reflected),
-                        should_scatter: true,
-                    },
+                    }),
                 }
             }
             Material::Lambertian { albedo } => {
                 let target = rec.p + rec.normal + random::random_in_unit_sphere();
-                ScatterRecord {
+                Some(ScatterRecord {
                     color: *albedo,
                     ray: Ray::new(rec.p, target - rec.p),
-                    should_scatter: true,
-                }
+                })
             }
             Material::Metal { albedo, fuzz } => {
                 let reflected = reflect(&r_in.direction(), &rec.normal);
@@ -96,12 +92,24 @@ impl Material {
                     reflected + random::random_in_unit_sphere() * f32::min(*fuzz, 1.0),
                 );
                 let should_scatter = scattered.direction().dot(&rec.normal) > 0.0;
-                ScatterRecord {
-                    color: *albedo,
-                    ray: scattered,
-                    should_scatter,
+                if should_scatter
+                {
+                    Some(ScatterRecord {
+                        color: *albedo,
+                        ray: scattered,
+                    })
+                }
+                else {
+                    None
                 }
             }
+            Material::DiffuseLight { color: _ } => None,
+        }
+    }
+    pub fn emitted(&self) -> Vector3 {
+        match self {
+            Material::DiffuseLight {color} => *color,
+            _ => Vector3::zero()
         }
     }
 }

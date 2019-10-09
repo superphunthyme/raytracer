@@ -6,7 +6,6 @@ use std::thread;
 extern crate clap;
 use clap::{App, Arg};
 
-use crate::aabb::AABB;
 use crate::bvh::BVHNode;
 use crate::camera::Camera;
 use crate::hitable::Hitable;
@@ -28,26 +27,22 @@ mod sphere;
 mod triangle;
 mod vec3;
 
-fn color<T: Hitable>(r: &Ray, s: &T, depth: u32) -> Vector3 {
-    match s.hit(r, 0.001, f32::MAX) {
+fn color<T: Hitable>(r: &Ray, scene_object: &T, depth: u32) -> Vector3 {
+    match scene_object.hit(r, 0.001, f32::MAX) {
         Some(hr) => {
             if depth < 50 {
                 let scatter = hr.material.scatter(r, &hr);
-                if scatter.should_scatter {
-                    scatter.color * color(&scatter.ray, s, depth + 1)
-                } else {
-                    Vector3::new(0.0, 0.0, 0.0)
+                match scatter {
+                    Some(s) => hr.material.emitted() + s.color * color(&s.ray, scene_object, depth + 1),
+                    None => hr.material.emitted()
                 }
             } else {
-                Vector3::new(0.0, 0.0, 0.0)
+                Vector3::zero()
             }
         }
         // Color background
         None => {
-            let unit_direction = r.direction().get_unit_vector();
-            // 0 < t < 1
-            let t = 0.5 * (unit_direction.y() + 1.0);
-            Vector3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vector3::new(0.5, 0.7, 1.0) * t
+            Vector3::new(0.2, 0.2, 0.2)
         }
     }
 }
@@ -64,8 +59,8 @@ fn random_scene() -> HitableList {
         },
     ));
 
-    for a in -11..11 {
-        for b in -11..11 {
+    for a in -5..5 {
+        for b in -5..5 {
             let choose_mat = RandUnit();
             let x_rand = RandUnit();
             let z_rand = RandUnit();
@@ -122,6 +117,17 @@ fn random_scene() -> HitableList {
             fuzz: 0.0,
         },
     ));
+
+
+    // Add a light to illuminate the scene
+    hitable_list.add(Sphere::new(
+        Vector3::new(1.0, 13.0, -10.0),
+        13.0,
+        Material::DiffuseLight {
+            color: Vector3::new(1.0, 0.54, 0.20),
+        },
+    ));
+
     hitable_list
 }
 
@@ -185,7 +191,7 @@ fn main() {
         lookfrom,
         lookat,
         vup,
-        20.0,
+        30.0,
         x_res as f32 / y_res as f32,
         aperture,
         dist_to_focus,
